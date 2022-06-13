@@ -49,6 +49,9 @@ set(PROJECT_SOURCES
         datadialog.h
         datadialog.cpp
         datadialog.ui
+        aboutdialog.h
+        aboutdialog.cpp
+        aboutdialog.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

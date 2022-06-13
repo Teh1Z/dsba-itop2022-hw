@@ -59,6 +59,9 @@ void CSVParser::write(const CountriesModel *model, const QString &dir)
     file.open(QIODevice::WriteOnly);
     QTextStream output(&file);
 
+    _rowsCount = model->rowCount();
+    _columnsCount = model->columnCount();
+
     for (size_t colId = 0; colId < _columnsCount; ++colId)
     {
         output << model->headerData(colId).toString();
@@ -86,22 +89,3 @@ const QStringList& CSVParser::getHeaders() const
     return _headers;
 }
 
-QStringList& CSVParser::operator [](const size_t idx)
-{
-    return _table[idx + 1];
-}
-
-QStringList CSVParser::operator [](const size_t idx) const
-{
-    return _table[idx + 1];
-}
-
-size_t CSVParser::getColumnsCount() const
-{
-    return _columnsCount;
-}
-
-size_t CSVParser::getRowsCount() const
-{
-    return _table.size() - 1;
-}

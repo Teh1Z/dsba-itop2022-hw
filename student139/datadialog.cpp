@@ -7,6 +7,7 @@ DataDialog::DataDialog(CountriesModel *model, QWidget *parent) :
     ui(new Ui::DataDialog)
 {
     ui->setupUi(this);
+    setWindowTitle("All data");
     ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView->verticalHeader()->setVisible(false);

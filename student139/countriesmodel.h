@@ -7,6 +7,8 @@
 
 class CountriesModel : public QAbstractTableModel
 {
+    Q_OBJECT
+
 public:
     CountriesModel() = default;
 
@@ -38,6 +40,9 @@ public:
 
     std::vector<Country*>::const_iterator begin() const;
     std::vector<Country*>::const_iterator end() const;
+
+signals:
+    void countryDeleted();
 
 private:
     std::vector<Country*> _countries;

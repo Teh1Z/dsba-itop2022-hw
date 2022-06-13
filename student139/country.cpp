@@ -9,12 +9,12 @@ QString Country::getName()
 
 QString Country::name() const
 {
-    return data[(int)CountryFields::name].value<QString>();
+    return data[int(CountryFields::name)].value<QString>();
 }
 
 uint64_t Country::confirmed() const
 {
-    return data[(int)CountryFields::confirmed].value<uint64_t>();
+    return data[int(CountryFields::confirmed)].value<uint64_t>();
 }
 
 uint64_t Country::deaths() const

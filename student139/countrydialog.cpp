@@ -11,6 +11,7 @@ CountryDialog::CountryDialog(CountryModel *countryModel, WatchlistModel *watchli
     ui(new Ui::CountryDialog)
 {
     ui->setupUi(this);
+    setWindowTitle("Country data");
     ui->label->setText(_countryModel->getCountry()->getName());
     ui->tableView->horizontalHeader()->setVisible(false);
     ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -22,8 +23,6 @@ CountryDialog::CountryDialog(CountryModel *countryModel, WatchlistModel *watchli
         ui->pushButton->setEnabled(false);
         ui->pushButton->setText("Already added");
     }
-
-//    connect(ui->tableView->itemDelegate(),SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)),SLOT(on_cell_returnPressed()));
 }
 
 CountryDialog::~CountryDialog()
@@ -44,18 +43,3 @@ void CountryDialog::on_pushButton_2_clicked()
     this->close();
     _countryModel->del();
 }
-
-
-//void CountryDialog::on_tableView_activated(const QModelIndex &index)
-//{
-//    QMessageBox msgBox;
-//    msgBox.setText("a");
-//    msgBox.exec();
-//}
-
-
-//void CountryDialog::on_tableView_activated(const QModelIndex &index)
-//{
-
-//}
-

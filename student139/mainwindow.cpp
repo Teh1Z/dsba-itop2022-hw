@@ -14,8 +14,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setWindowTitle("Corona data application");
     logo = new logoWidget(this);
-//    _filterModel = new FilterModel(this, this);
 
     logo->setFixedSize(25, 25);
     ui->gridLayout_3->addWidget(logo, 0, 0);
@@ -30,7 +30,11 @@ MainWindow::MainWindow(QWidget *parent)
     _proxyModel = new QSortFilterProxyModel();
     _watchlistModel = new WatchlistModel();
     _ratingModel = new RatingModel();
-    _filterModel = new FilterModel(this, this);
+
+    _sorter = new SortModel(this);
+    _sorter->sort(1, Qt::DescendingOrder);
+    _sorter->setSortRole(RatingModel::SortRole);
+    ui->tableView_2->setModel(_sorter);
 }
 
 MainWindow::~MainWindow()
@@ -42,33 +46,19 @@ MainWindow::~MainWindow()
     delete _ratingModel;
 }
 
-void MainWindow::setupProxyModel()
-{
-    _proxyModel->setSourceModel(_ratingModel);
-    _proxyModel->sort(1, Qt::DescendingOrder);
-    ui->tableView_2->setModel(_proxyModel);
-}
-
-FilterModel::FilterModel (QObject *parent, const MainWindow *main_window) : QSortFilterProxyModel (parent), main_window (main_window) {}
-
-bool FilterModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const
-{
-
-}
-
-void MainWindow::setCompleter (const std::vector<Country*> &data)
+void MainWindow::resetCompleter ()
 {
     QStringList wordList;
 
-    for (size_t i = 0; i < data.size(); ++i)
-        wordList.append(data[i]->data[0].toString());
+    for (auto country : *_allCountries) {
+        wordList.append(country->getName());
+    }
 
+    delete ui->lineEdit->completer();
     QCompleter* completer = new QCompleter(wordList, this);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
     ui->lineEdit->setCompleter(completer);
 }
-
-
 
 void MainWindow::on_actionOpen_File_triggered()
 {
@@ -76,8 +66,11 @@ void MainWindow::on_actionOpen_File_triggered()
     if (!dir.size())
         return;
     auto data = _csvParser.read(dir);
+
     _allCountries = new CountriesModel(data);
-    setCompleter(_allCountries->getAllCountries());
+
+    connect(_allCountries, SIGNAL(countryDeleted()), this, SLOT(resetCompleter()));
+    resetCompleter();
 
     ui->comboBox->clear();
     QStringList _fields = _csvParser.getHeaders();
@@ -85,18 +78,15 @@ void MainWindow::on_actionOpen_File_triggered()
     _fields.removeLast();
     ui->comboBox->addItems(_fields);
 
-//    _allCountries = new CountriesModel(data);
     _allRegions = new RegionModel(_allCountries);
     ui->tableView->verticalHeader()->setVisible(false);
     ui->tableView->setModel(_allRegions);
 }
 
-
 void MainWindow::on_actionSave_File_triggered()
 {
     _csvParser.write(_allCountries);
 }
-
 
 void MainWindow::on_actionSave_File_As_triggered()
 {
@@ -110,7 +100,6 @@ void MainWindow::on_actionSave_File_As_triggered()
 void MainWindow::on_pushButton_clicked()
 {
     WatchlistDialog watchlist_dialog(_allCountries, _watchlistModel, _ratingModel, _allRegions, this);
-    watchlist_dialog.setWindowTitle("Watchlist");
     watchlist_dialog.exec();
 }
 
@@ -125,7 +114,6 @@ void MainWindow::on_lineEdit_returnPressed()
     }
     CountryModel countryModel(country, _allCountries, _watchlistModel, _ratingModel, _allRegions);
     CountryDialog country_dialog(&countryModel, _watchlistModel, this);
-    country_dialog.setWindowTitle("Country data");
     country_dialog.exec();
 }
 
@@ -138,15 +126,9 @@ void MainWindow::on_tableView_doubleClicked(const QModelIndex &index)
             delete _ratingModel;
 
         _ratingModel = new RatingModel(reg->getCountries(), ui->comboBox->currentIndex() + 1);
-        _filterModel->setSourceModel(_ratingModel);
-        ui->tableView_2->setModel(_filterModel);
-
-//        ui->tableView_2->setModel(_proxyModel);
-//        ui->tableView_2->sortByColumn(2, Qt::DescendingOrder);
-
+        _sorter->setSourceModel(_ratingModel);
     }
 }
-
 
 void MainWindow::on_comboBox_currentIndexChanged(int index)
 {
@@ -157,7 +139,6 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
 void MainWindow::on_actionView_all_data_triggered()
 {
     DataDialog dataDialog(_allCountries, this);
-    dataDialog.setWindowTitle("All data");
     dataDialog.exec();
 }
 
@@ -166,10 +147,9 @@ void MainWindow::on_tableView_2_doubleClicked(const QModelIndex &index)
 {
     if (index.column() == 0)
     {
-        Country* country = _ratingModel->getCountry(index);
+        Country* country = _ratingModel->getCountry(_sorter->mapToSource(index));
         CountryModel countryModel(country, _allCountries, _watchlistModel, _ratingModel, _allRegions);
         CountryDialog country_dialog(&countryModel, _watchlistModel);
-        country_dialog.setWindowTitle("Country data");
         country_dialog.exec();
     }
 }
@@ -177,7 +157,21 @@ void MainWindow::on_tableView_2_doubleClicked(const QModelIndex &index)
 void MainWindow::on_actionAdd_country_triggered()
 {
     AddCountryDialog addCountry(_allCountries, _allRegions, this);
-    addCountry.setWindowTitle("Add new Country");
+    connect(&addCountry, SIGNAL(countryAdded()), this, SLOT(resetCompleter()));
     addCountry.exec();
 }
 
+SortModel::SortModel(QObject* parent) : QSortFilterProxyModel(parent) {}
+
+QVariant SortModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation == Qt::Vertical && role == Qt::DisplayRole)
+        return section + 1;
+    return QSortFilterProxyModel::headerData(section, orientation, role);
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    AboutDialog aboutDialog(this);
+    aboutDialog.exec();
+}

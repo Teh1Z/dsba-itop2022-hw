@@ -10,6 +10,7 @@
 #include "logowidget.h"
 #include "ratingmodel.h"
 #include "addcountrydialog.h"
+#include "aboutdialog.h"
 
 #include <QMainWindow>
 #include <QSortFilterProxyModel>
@@ -18,7 +19,7 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-class FilterModel;
+class SortModel;
 
 class MainWindow : public QMainWindow
 {
@@ -26,10 +27,11 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
-//    Country &getCountryByIndex(QModelIndex index) const;
 
-    void setCompleter (const std::vector<Country*> &data);
     ~MainWindow();
+
+public slots:
+    void resetCompleter();
 
 private slots:
     void on_actionOpen_File_triggered();
@@ -52,6 +54,8 @@ private slots:
 
     void on_actionAdd_country_triggered();
 
+    void on_actionAbout_triggered();
+
 private:
     void setupProxyModel();
     QSortFilterProxyModel *_proxyModel = nullptr;
@@ -59,23 +63,20 @@ private:
     CountriesModel *_allCountries = nullptr;
     WatchlistModel *_watchlistModel = nullptr;
     RatingModel *_ratingModel = nullptr;
-    FilterModel *_filterModel = nullptr;
+    SortModel* _sorter;
 
     Ui::MainWindow *ui;
     logoWidget *logo;
     CSVParser _csvParser;
 };
 
-class FilterModel : public QSortFilterProxyModel
+
+class SortModel : public QSortFilterProxyModel
 {
-   Q_OBJECT
 public:
-  FilterModel (QObject *parent, const MainWindow *main_window);
-protected:
-//  virtual bool filterAcceptsRow (int source_row, const QModelIndex &parent) const override;
-  virtual bool lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const override;
-private:
-  const MainWindow *main_window = nullptr;
+    SortModel(QObject* parent = nullptr);
+
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 };
 
 #endif // MAINWINDOW_H

@@ -7,7 +7,15 @@
 
 class RatingModel : public QAbstractTableModel
 {
+    Q_OBJECT
+
 public:
+
+    enum AdditionalRoles
+    {
+        SortRole = Qt::UserRole
+    };
+
     RatingModel() = default;
 
     RatingModel(const std::vector<Country*> &countries, int ind = 1);
@@ -20,9 +28,9 @@ public:
 
     Country* getCountry(const QModelIndex &index) const;
 
-    void del(const Country *country);
+    std::vector<Country*> getCountries();
 
-//    void sort(int column = 1, Qt::SortOrder order = Qt::DescendingOrder) override;
+    void del(const Country *country);
 
     QVariant data(const QModelIndex &index, int role = Qt::EditRole) const override;
 
@@ -33,11 +41,6 @@ public:
 private:
     int _index = 1;
     std::vector<Country*> _rating;
-};
-
-struct Comparator
-{
-
 };
 
 #endif // RATINGMODEL_H

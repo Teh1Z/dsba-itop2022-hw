@@ -115,6 +115,7 @@
     <addaction name="actionSave_File_As"/>
     <addaction name="actionView_all_data"/>
     <addaction name="actionAdd_country"/>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -142,6 +143,11 @@
   <action name="actionAdd_country">
    <property name="text">
     <string>Add country</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>

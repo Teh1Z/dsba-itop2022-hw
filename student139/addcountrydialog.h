@@ -19,8 +19,13 @@ public:
     explicit AddCountryDialog(CountriesModel *countriesModel, RegionModel *regionModel, QWidget *parent = nullptr);
     ~AddCountryDialog();
 
+signals:
+    void countryAdded();
+
 private slots:
     void on_buttonBox_accepted();
+
+    void on_buttonBox_rejected();
 
 private:
     Ui::AddCountryDialog *ui;

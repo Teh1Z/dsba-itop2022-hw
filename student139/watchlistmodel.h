@@ -8,6 +8,8 @@
 
 class WatchlistModel : public QAbstractTableModel
 {
+    Q_OBJECT
+
 public:
     WatchlistModel() = default;
 

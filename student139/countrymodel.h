@@ -10,6 +10,8 @@
 
 class CountryModel : public QAbstractTableModel
 {
+    Q_OBJECT
+
 public:
     CountryModel() = default;
 
@@ -27,12 +29,6 @@ public:
     void chageData();
 
     void del();
-
-//    void setData(const std::vector<Country> &data);
-
-//    void setData(const Country &data);
-
-//    void deleteData(int ind);
 
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 

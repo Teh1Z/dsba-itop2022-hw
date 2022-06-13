@@ -19,20 +19,6 @@ public:
     void write(const CountriesModel *model, const QString &dir = nullptr);
 
     const QStringList& getHeaders() const;
-
-//    size_t getColumnIndex(const std::string& columnName);
-
-    size_t getColumnsCount() const;
-
-    size_t getRowsCount() const;
-
-//    std::vector<Country> getData();
-
-//    size_t findFirst(const std::vector<QString>& querry) const;
-
-    QStringList& operator[](const size_t idx);
-
-    QStringList operator [](const size_t idx) const;
 private:
     QString _dir;
     size_t _columnsCount = 0;

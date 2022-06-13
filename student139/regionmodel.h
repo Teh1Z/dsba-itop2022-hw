@@ -9,6 +9,8 @@
 
 class RegionModel : public QAbstractTableModel
 {
+    Q_OBJECT
+
 public:
     RegionModel(const CountriesModel *allCountries);
 

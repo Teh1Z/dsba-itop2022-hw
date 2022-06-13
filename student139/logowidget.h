@@ -8,6 +8,7 @@ class logoWidget : public QWidget
 {
 public:
     logoWidget(QWidget *parent = nullptr);
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 };

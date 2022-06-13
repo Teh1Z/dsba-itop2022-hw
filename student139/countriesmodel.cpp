@@ -57,6 +57,7 @@ void CountriesModel::del(const Country* country)
     _countries.erase(it);
     endResetModel();
     emit layoutChanged();
+    emit countryDeleted();
 }
 
 bool CountriesModel::setData(const QModelIndex &index, const QVariant &value, int role)

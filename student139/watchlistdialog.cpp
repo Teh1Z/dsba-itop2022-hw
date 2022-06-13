@@ -11,6 +11,7 @@ WatchlistDialog::WatchlistDialog(CountriesModel *mainModel, WatchlistModel *watc
     ui(new Ui::WatchlistDialog)
 {
     ui->setupUi(this);
+    setWindowTitle("Watchlist");
     if (_watchlistModel->rowCount() == 0)
         ui->pushButton->setEnabled(false);
     ui->tableView->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);

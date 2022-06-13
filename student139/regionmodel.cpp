@@ -31,13 +31,18 @@ Region* RegionModel::getRegion(const QModelIndex &index) const
 
 void RegionModel::del(Country *country)
 {
-    for (Region* region : _regions)
+    for (size_t i = 0; i < _regions.size(); ++i)
     {
-        auto it = std::find(region->begin(), region->end(), country);
-        if (it == region->end())
+        auto it = std::find(_regions[i]->begin(), _regions[i]->end(), country);
+        if (it == _regions[i]->end())
             continue;
         beginResetModel();
-        region->erase(it);
+        _regions[i]->erase(it);
+        if (_regions[i]->getCountries().size() == 0)
+        {
+            _regions.erase(_regions.begin() + i);
+            delete _regions[i];
+        }
         endResetModel();
     }
     emit layoutChanged();
