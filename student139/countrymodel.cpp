@@ -43,7 +43,11 @@ void CountryModel::del()
 bool CountryModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     beginResetModel();
-    if (index.row() < 8 || index.row() > 10)
+    bool flag = false;
+    value.toString().toUInt(&flag, 10);
+    if (index.row() == 0 || index.row() == 14)
+        _country->data[index.row()].setValue(value);
+    if ((index.row() < 8 || index.row() > 10) && flag)
     {
         _country->data[index.row()].setValue(value);
         if (!_country->data[1].toString().isEmpty() && !_country->data[2].toString().isEmpty())

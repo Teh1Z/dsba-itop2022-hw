@@ -8,10 +8,10 @@
 
 CSVParser::CSVParser() {}
 
-std::vector<Country> CSVParser::read(const QString &dir)
+std::vector<Country*> CSVParser::read(const QString &dir)
 {
     QFile file(dir);
-    std::vector<Country> result;
+    std::vector<Country*> result;
 
     if (!file.open(QIODevice::ReadOnly))
     {
@@ -26,7 +26,7 @@ std::vector<Country> CSVParser::read(const QString &dir)
     QTextStream inputStream(&file);
 
     QString line = inputStream.readLine();
-    for (QString &word : line.split(','))
+    for (QString& word : line.split(','))
     {
         _headers.append(word);
         _columnsCount++;
@@ -34,14 +34,14 @@ std::vector<Country> CSVParser::read(const QString &dir)
 
     do
     {
-        Country row;
+        std::array<QVariant, static_cast<int>(CountryFields::COUNT)> row;
         QStringList wordList = inputStream.readLine().split(',');
 
         for (size_t i = 0; i < _columnsCount; ++i)
-            row.data[i] = wordList[i];
+            row[i] = wordList[i];
 
         _rowsCount++;
-        result.push_back(row);
+        result.push_back(new Country(row));
     } while (!inputStream.atEnd());
 
     file.close();

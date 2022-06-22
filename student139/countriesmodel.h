@@ -12,7 +12,7 @@ class CountriesModel : public QAbstractTableModel
 public:
     CountriesModel() = default;
 
-    CountriesModel(const std::vector<Country> &data);
+    CountriesModel(const std::vector<Country*> &data);
 
     ~CountriesModel() noexcept;
 

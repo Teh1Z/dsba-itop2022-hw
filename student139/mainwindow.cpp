@@ -6,6 +6,7 @@
 #include <QCompleter>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QStandardItemModel>
 
 #include <sstream>
 
@@ -18,16 +19,17 @@ MainWindow::MainWindow(QWidget *parent)
     logo = new logoWidget(this);
 
     logo->setFixedSize(25, 25);
-    ui->gridLayout_3->addWidget(logo, 0, 0);
+    ui->horizontalLayout_3->addWidget(logo, 0);
     ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    ui->tableView_2->horizontalHeader()->setVisible(false);
+    ui->tableView_2->setSortingEnabled(true);
     ui->tableView_2->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView_2->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
+
+
     _allCountries = new CountriesModel();
-    _proxyModel = new QSortFilterProxyModel();
     _watchlistModel = new WatchlistModel();
     _ratingModel = new RatingModel();
 
@@ -46,15 +48,11 @@ MainWindow::~MainWindow()
     delete _ratingModel;
 }
 
-void MainWindow::resetCompleter ()
+void MainWindow::resetCompleter()
 {
     QStringList wordList;
-
-    for (auto country : *_allCountries) {
+    for (auto country : *_allCountries)
         wordList.append(country->getName());
-    }
-
-    delete ui->lineEdit->completer();
     QCompleter* completer = new QCompleter(wordList, this);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
     ui->lineEdit->setCompleter(completer);
@@ -76,7 +74,19 @@ void MainWindow::on_actionOpen_File_triggered()
     QStringList _fields = _csvParser.getHeaders();
     _fields.removeFirst();
     _fields.removeLast();
-    ui->comboBox->addItems(_fields);
+
+    QStandardItemModel *model = new QStandardItemModel(_fields.size(), 1);
+    for (int i = 0; i < _fields.size(); ++i)
+    {
+        QStandardItem* item = new QStandardItem(_fields[i]);
+        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        _items.push_back(item);
+        model->setItem(i, 0, item);
+    }
+    ui->comboBox->setModel(model);
+    connect(model, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this,
+            SLOT(slot_changed(const QModelIndex&, const QModelIndex&)));
 
     _allRegions = new RegionModel(_allCountries);
     ui->tableView->verticalHeader()->setVisible(false);
@@ -99,22 +109,23 @@ void MainWindow::on_actionSave_File_As_triggered()
 
 void MainWindow::on_pushButton_clicked()
 {
-    WatchlistDialog watchlist_dialog(_allCountries, _watchlistModel, _ratingModel, _allRegions, this);
-    watchlist_dialog.exec();
+    WatchlistDialog watchlistDialog(_allCountries, _watchlistModel, _ratingModel, _allRegions, this);
+    watchlistDialog.exec();
 }
 
 void MainWindow::on_lineEdit_returnPressed()
 {
     QString text = ui->lineEdit->text();
     Country* country = _allCountries->getCountry(text);
+    ui->lineEdit->clear();
     if (country == nullptr)
     {
         QMessageBox::warning(this, "Search error", "Not found country: " + text);
         return;
     }
     CountryModel countryModel(country, _allCountries, _watchlistModel, _ratingModel, _allRegions);
-    CountryDialog country_dialog(&countryModel, _watchlistModel, this);
-    country_dialog.exec();
+    CountryDialog countryDialog(&countryModel, _watchlistModel);
+    countryDialog.exec();
 }
 
 void MainWindow::on_tableView_doubleClicked(const QModelIndex &index)
@@ -125,15 +136,12 @@ void MainWindow::on_tableView_doubleClicked(const QModelIndex &index)
         if (_ratingModel != nullptr)
             delete _ratingModel;
 
-        _ratingModel = new RatingModel(reg->getCountries(), ui->comboBox->currentIndex() + 1);
+        QStringList _fields = _csvParser.getHeaders();
+        _fields.removeFirst();
+        _fields.removeLast();
+        _ratingModel = new RatingModel(reg->getCountries(), _fields);
         _sorter->setSourceModel(_ratingModel);
     }
-}
-
-void MainWindow::on_comboBox_currentIndexChanged(int index)
-{
-    if (_ratingModel != nullptr)
-        _ratingModel->changeIndex(index + 1);
 }
 
 void MainWindow::on_actionView_all_data_triggered()
@@ -142,15 +150,14 @@ void MainWindow::on_actionView_all_data_triggered()
     dataDialog.exec();
 }
 
-
 void MainWindow::on_tableView_2_doubleClicked(const QModelIndex &index)
 {
     if (index.column() == 0)
     {
         Country* country = _ratingModel->getCountry(_sorter->mapToSource(index));
         CountryModel countryModel(country, _allCountries, _watchlistModel, _ratingModel, _allRegions);
-        CountryDialog country_dialog(&countryModel, _watchlistModel);
-        country_dialog.exec();
+        CountryDialog countryDialog(&countryModel, _watchlistModel);
+        countryDialog.exec();
     }
 }
 
@@ -174,4 +181,13 @@ void MainWindow::on_actionAbout_triggered()
 {
     AboutDialog aboutDialog(this);
     aboutDialog.exec();
+}
+
+void MainWindow::slot_changed(const QModelIndex& lIndex, const QModelIndex& rIndex)
+{
+    QStandardItem* item = _items[lIndex.row()];
+    if (item->checkState() == Qt::Checked)
+        _ratingModel->addIndex(lIndex.row());
+    else
+        _ratingModel->delIndex(lIndex.row());
 }

@@ -18,13 +18,17 @@ public:
 
     RatingModel() = default;
 
-    RatingModel(const std::vector<Country*> &countries, int ind = 1);
+    RatingModel(const std::vector<Country*> &countries, QStringList headers = {}, std::vector<int> indexes = {});
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    void changeIndex(int ind);
+    void changeIndexes(std::vector<int> indexes);
+
+    void addIndex(int index);
+
+    void delIndex(int index);
 
     Country* getCountry(const QModelIndex &index) const;
 
@@ -39,7 +43,9 @@ public:
     std::vector<Country*>::const_iterator begin() const;
     std::vector<Country*>::const_iterator end() const;
 private:
-    int _index = 1;
+    int _newIndex;
+    QStringList _headers;
+    std::vector<int> _indexes;
     std::vector<Country*> _rating;
 };
 

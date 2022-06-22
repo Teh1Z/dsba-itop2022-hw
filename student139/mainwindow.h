@@ -13,6 +13,7 @@
 #include "aboutdialog.h"
 
 #include <QMainWindow>
+#include <QStandardItem>
 #include <QSortFilterProxyModel>
 
 QT_BEGIN_NAMESPACE
@@ -33,6 +34,8 @@ public:
 public slots:
     void resetCompleter();
 
+    void slot_changed(const QModelIndex &lIndex, const QModelIndex &rIndex);
+
 private slots:
     void on_actionOpen_File_triggered();
 
@@ -46,8 +49,6 @@ private slots:
 
     void on_actionSave_File_As_triggered();
 
-    void on_comboBox_currentIndexChanged(int index);
-
     void on_actionView_all_data_triggered();
 
     void on_tableView_2_doubleClicked(const QModelIndex &index);
@@ -58,12 +59,12 @@ private slots:
 
 private:
     void setupProxyModel();
-    QSortFilterProxyModel *_proxyModel = nullptr;
     RegionModel *_allRegions = nullptr;
     CountriesModel *_allCountries = nullptr;
     WatchlistModel *_watchlistModel = nullptr;
     RatingModel *_ratingModel = nullptr;
     SortModel* _sorter;
+    std::vector<QStandardItem*> _items = {};
 
     Ui::MainWindow *ui;
     logoWidget *logo;

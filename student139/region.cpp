@@ -10,7 +10,7 @@ void Region::addCountry(Country *country)
 uint64_t Region::getCases() const
 {
     uint64_t count = 0;
-    for (auto &country : _countries)
+    for (auto& country : _countries)
         count += country->confirmed();
 
     return count;

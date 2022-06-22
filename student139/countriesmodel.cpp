@@ -1,10 +1,6 @@
 #include "countriesmodel.h"
 
-CountriesModel::CountriesModel(const std::vector<Country> &data)
-{
-    for (auto &country : data)
-        _countries.push_back(new Country(country));
-}
+CountriesModel::CountriesModel(const std::vector<Country*> &data) : _countries(data) {}
 
 CountriesModel::~CountriesModel() noexcept
 {
@@ -26,7 +22,7 @@ int CountriesModel::columnCount(const QModelIndex &parent) const
 
 Country* CountriesModel::getCountry(const QString &name)
 {
-    for (Country *country : _countries)
+    for (Country* country : _countries)
     {
         if (country->name() == name)
             return country;
@@ -56,8 +52,8 @@ void CountriesModel::del(const Country* country)
     delete *it;
     _countries.erase(it);
     endResetModel();
-    emit layoutChanged();
     emit countryDeleted();
+    emit layoutChanged();
 }
 
 bool CountriesModel::setData(const QModelIndex &index, const QVariant &value, int role)

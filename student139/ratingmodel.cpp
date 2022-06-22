@@ -1,12 +1,8 @@
 #include "ratingmodel.h"
 
 
-RatingModel::RatingModel(const std::vector<Country*> &countries, int ind) : _rating(countries), _index(ind)
-{
-//    Comparator comp(_index);
-//    std::sort(_rating.begin(), _rating.end(), comp);
-
-}
+RatingModel::RatingModel(const std::vector<Country*> &countries, QStringList headers,  std::vector<int> indexes)
+    : _rating(countries), _headers(headers), _indexes(indexes) {}
 
 int RatingModel::rowCount(const QModelIndex &parent) const
 {
@@ -15,13 +11,32 @@ int RatingModel::rowCount(const QModelIndex &parent) const
 
 int RatingModel::columnCount(const QModelIndex &parent) const
 {
-    return 2;
+    return _indexes.size() + 1;
 }
 
-void RatingModel::changeIndex(int ind)
+void RatingModel::changeIndexes(std::vector<int> indexes)
 {
     beginResetModel();
-    _index = ind;
+    _indexes = indexes;
+    endResetModel();
+    emit layoutChanged();
+}
+
+void RatingModel::addIndex(int index)
+{
+    beginResetModel();
+    _indexes.push_back(index);
+    endResetModel();
+    emit layoutChanged();
+}
+
+void RatingModel::delIndex(int index)
+{
+    auto it = std::find(_indexes.begin(), _indexes.end(), index);
+    if (it == _indexes.end())
+        return;
+    beginResetModel();
+    _indexes.erase(it);
     endResetModel();
     emit layoutChanged();
 }
@@ -55,7 +70,7 @@ QVariant RatingModel::data(const QModelIndex &index, int role) const
         if (index.column() == 0)
             return country->name();
         else
-            return country->data[_index];
+            return country->data[_indexes[index.column() - 1]];
     }
     else if (role == SortRole)
     {
@@ -63,13 +78,20 @@ QVariant RatingModel::data(const QModelIndex &index, int role) const
         if (index.column() == 0)
             return country->name();
         else
-            return country->data[_index].value<double>();
+            return country->data[_indexes[index.column() - 1]].value<double>();
     }
     return {};
 }
 
 QVariant RatingModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
+    if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+    {
+        if (section == 0)
+            return "Country";
+        else
+            return _headers[_indexes[section - 1]];
+    }
     if (role == Qt::DisplayRole && orientation == Qt::Vertical)
         return section + 1;
     return {};

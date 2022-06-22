@@ -14,7 +14,7 @@ public:
 
     QString getPath() const;
 
-    std::vector<Country> read(const QString &dir);
+    std::vector<Country*> read(const QString &dir);
 
     void write(const CountriesModel *model, const QString &dir = nullptr);
 
@@ -25,7 +25,6 @@ private:
     size_t _rowsCount = 0;
 
     QStringList _headers;
-    std::vector<QStringList> _table;
 };
 
 #endif // CSVPARSER_H
